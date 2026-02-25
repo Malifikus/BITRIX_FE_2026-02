@@ -30,5 +30,7 @@ include_once(__DIR__ . '/init_scripts/event_handlers/disable_specific_notificati
 // Кнопка Платежи в цифровом рабочем месте
 // include_once(__DIR__ . '/init_scripts/event_handlers/invoiceButton.php');
 
+// Валидация длины отчета weekly с переопределением js файла
+include_once(__DIR__ . '/init_scripts/event_handlers/report_validator_on_epilog.php');
 
 ?>
