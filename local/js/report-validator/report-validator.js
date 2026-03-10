@@ -1,7 +1,7 @@
 (function() {
     'use strict';
     
-    const MIN_REPORT_CHARS = 100;
+    const MIN_REPORT_CHARS = 75;
     const CHECK_INTERVAL_MS = 500;
     const REPORT_IFRAME_SELECTOR = 'iframe[id*="LHE_iframe_obReportWeekly"]';
     const SEND_BUTTON_ID = 'tm-work-report-send';

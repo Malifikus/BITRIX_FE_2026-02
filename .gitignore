@@ -1,0 +1,78 @@
+# Игнорируем все в корне
+/*
+
+# Папка local
+!/local/
+!/local/*
+!/local/**/
+
+# Корневые файлы
+.htaccess
+.htsecure
+.access.php
+.section.php
+!index.php
+!robots.txt
+!404.php
+!500.html
+!favicon.ico
+!urlrewrite.php
+!ustat.php
+.top.menu.php
+.bottom.menu.php
+.left.menu.php
+.top.menu_ext.php
+.bottom.menu_ext.php
+
+# Конфиги и системные файлы
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+/local/php_interface/dbconn.php
+/local/php_interface/dbconn_local.php
+/bitrix/php_interface/dbconn.php
+*.config.local.php
+
+# Кэш и временные файлы
+/cache/
+/bx_temp/
+.bx_temp/
+*.tmp
+*.restore
+
+# Чувствительные файлы
+*.csv
+!.gitignore
+
+# Логи
+*.log
+*.log.*
+msmtp_default.log*
+debug.txt
+maillog.txt
+idealog.txt
+
+# Медиа
+/upload/
+
+# Ядро Битрикс24
+/bitrix/
+
+# Сторонние библиотеки
+/vendor/
+/node_modules/
+
+# Сторонние модули и доработки
+/local/php_interface/s1/init_scripts/
+test-vibe/
+/local/components/bestrank
+/local/components/bq
+/local/templates/.default/components/bitrix/bizproc.workflow.start.list
+/local/components/bitrix/bizproc.workflow.info
+/local/templates/.default/components/bitrix/intranet.customsection
+/local/activities
+
+# Доработки Malifikus
+!/local/php_interface/s1/init_scripts/event_handlers/report_validator_on_epilog.php
