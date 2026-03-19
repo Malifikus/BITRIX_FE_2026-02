@@ -12,296 +12,300 @@ class CompanyContactSync
 {
     private $db;
     private $moduleId = 'b2b.integration';
+    
+    // Кэш компаний и менеджеров
+    private $companyCache = [];
+    private $managerCache = [];
+    
+    // ID администратора B2B (исключаем из менеджеров)
+    private $b2bAdminId = 9947;
+    private $techUserId = 1668;
+    
+    // Режим работы
+    private $isFirstImport = false;
 
     public function __construct()
     {
         $this->db = DbHelper::getInstance();
+        $this->detectImportMode();
     }
 
-    public function run($fromDate = null)
+    private function detectImportMode()
     {
-        $fullImportDone = Option::get($this->moduleId, 'full_import_done', 'N');
+        $firstImportDone = Option::get($this->moduleId, 'first_import_companies_done', 'N');
+        $this->isFirstImport = ($firstImportDone != 'Y');
         
-        if ($fullImportDone != 'Y') {
-            Logger::write('Первичный импорт компаний+контактов не выполнен. Запускаем полный импорт...');
-            $this->fullImport();
-            Option::set($this->moduleId, 'full_import_done', 'Y');
+        if ($this->isFirstImport) {
+            Logger::write('Режим первичный импорт компании и контакты');
         } else {
-            Logger::write('Запуск инкрементальной синхронизации компаний+контактов');
-            $this->incrementalImport($fromDate);
+            Logger::write('Режим регулярное обновление компании и контакты');
         }
     }
 
-    public function fullImport()
+    public function run()
     {
-        Logger::write('Начало ПОЛНОГО импорта компаний+контактов');
+        Logger::write('Начало синхронизации компаний и контактов');
         
-        // Импортируем все компании
-        $this->fullImportCompanies();
+        if ($this->isFirstImport) {
+            $this->runFirstImport();
+        } else {
+            $this->runRegularUpdate();
+        }
         
-        // Импортируем контакты
-        $this->fullImportContacts();
-        
-        SyncStateTable::updateLastSync('company_contact');
-        Logger::success("Полный импорт компаний+контактов завершен");
+        Logger::write('Синхронизация компаний и контактов завершена');
     }
 
-    private function fullImportCompanies()
+    private function runFirstImport()
     {
-        Logger::write('Импорт компаний');
+        Logger::write('Первичный импорт компаний');
+        $this->syncCompanies(true);
         
-        $page = 0;
-        $limit = 500;
-        $totalProcessed = 0;
+        Logger::write('Первичный импорт контактов');
+        $this->syncContacts(true);
         
-        do {
-            $offset = $page * $limit;
-            
-            $sql = "
-                SELECT 
-                    c.id,
-                    c.name,
-                    c.updated_at,
-                    le.inn,
-                    le.kpp,
-                    le.name as legal_name,
-                    le.short_name
-                FROM company c
-                LEFT JOIN legal_entity le ON c.id = le.company_id
-                WHERE c.is_test = 0
-                ORDER BY c.id ASC
-                LIMIT $limit OFFSET $offset";
-            
-            $result = $this->db->query($sql);
-            if (!$result) break;
-            
-            $rows = $this->db->fetchAll($result);
-            $processed = 0;
-            
-            foreach ($rows as $row) {
-                if ($this->processCompany($row)) {
-                    $processed++;
-                }
-            }
-            
-            $totalProcessed += $processed;
-            Logger::write("Страница $page: обработано $processed компаний");
-            
-            $page++;
-            
-        } while (count($rows) == $limit);
+        Option::set($this->moduleId, 'first_import_companies_done', 'Y');
         
-        Logger::success("Импорт компаний завершен. Всего: $totalProcessed");
+        $now = new DateTime();
+        SyncStateTable::updateLastSync('company', 0, $now);
+        SyncStateTable::updateLastSync('contact', 0, $now);
     }
 
-    private function fullImportContacts()
+    private function runRegularUpdate()
     {
-        Logger::write('Импорт контактов для компаний');
+        Logger::write('Регулярное обновление компаний');
+        $this->syncCompanies(false);
         
-        // Получаем список всех компаний с ИНН
+        Logger::write('Регулярное обновление контактов');
+        $this->syncContacts(false);
+        
+        $now = new DateTime();
+        SyncStateTable::updateLastSync('company', 0, $now);
+        SyncStateTable::updateLastSync('contact', 0, $now);
+    }
+
+    private function syncCompanies($isFirstImport)
+    {
+        $lastSync = $isFirstImport 
+            ? DateTime::createFromTimestamp(0) 
+            : SyncStateTable::getLastSync('company');
+        
+        $sqlDate = $lastSync->format('Y-m-d H:i:s');
+        
         $sql = "
             SELECT 
                 c.id as company_id,
-                le.inn
-            FROM company c
-            LEFT JOIN legal_entity le ON c.id = le.company_id
-            WHERE le.inn IS NOT NULL";
-        
-        $result = $this->db->query($sql);
-        if (!$result) return;
-        
-        $companies = $this->db->fetchAll($result);
-        $totalProcessed = 0;
-        
-        foreach ($companies as $company) {
-            $processed = $this->importContactsForCompany($company['company_id'], $company['inn']);
-            $totalProcessed += $processed;
-        }
-        
-        Logger::success("Импорт контактов завершен. Всего: $totalProcessed");
-    }
-
-    private function importContactsForCompany($companyId, $inn)
-    {
-        // Ищем компанию в Битрикс по ИНН
-        $bitrixCompanyId = BitrixHelper::findCompanyByInn($inn);
-        if (!$bitrixCompanyId) {
-            Logger::write("Компания с ИНН $inn не найдена в Битрикс, контакты не импортируются");
-            return 0;
-        }
-        
-        // Получаем контакты компании из order_meta
-        $sql = "
-            SELECT 
-                om.user_firstname as firstname,
-                om.user_lastname as lastname,
-                om.user_phone as phone,
-                om.user_email as email
-            FROM order_meta om
-            JOIN `order` o ON om.order_id = o.id
-            WHERE o.company_id = " . (int)$companyId . "
-            AND om.user_role = 'Client'
-            AND om.user_firstname IS NOT NULL
-            AND om.user_lastname IS NOT NULL
-            AND (om.user_email IS NOT NULL OR om.user_phone IS NOT NULL)
-            GROUP BY om.user_email";
-        
-        $result = $this->db->query($sql);
-        if (!$result) return 0;
-        
-        $contacts = $this->db->fetchAll($result);
-        $processed = 0;
-        
-        foreach ($contacts as $contact) {
-            if ($this->processContact($contact, $bitrixCompanyId)) {
-                $processed++;
-            }
-        }
-        
-        return $processed;
-    }
-
-    public function incrementalImport($fromDate = null)
-    {
-        if ($fromDate) {
-            $sqlDate = $fromDate . ' 00:00:00';
-            Logger::write("Используем дату из формы: $sqlDate");
-        } else {
-            $lastSync = SyncStateTable::getLastSync('company_contact');
-            $sqlDate = $lastSync->format('Y-m-d H:i:s');
-        }
-        
-        // Импортируем измененные компании
-        $this->incrementalImportCompanies($sqlDate);
-        
-        // Импортируем контакты из измененных заказов
-        $this->incrementalImportContacts($sqlDate);
-        
-        SyncStateTable::updateLastSync('company_contact');
-    }
-
-    private function incrementalImportCompanies($sqlDate)
-    {
-        $sql = "
-            SELECT 
-                c.id,
-                c.name,
+                c.name as company_name,
+                c.is_individual,          -- нужно для определения типа (юрлицо/ИП)
                 c.updated_at,
                 le.inn,
                 le.kpp,
                 le.name as legal_name,
-                le.short_name
+                le.short_name as legal_short_name
             FROM company c
             LEFT JOIN legal_entity le ON c.id = le.company_id
-            WHERE c.updated_at > '$sqlDate'
-            AND c.is_test = 0
-            ORDER BY c.updated_at ASC";
+            WHERE le.inn IS NOT NULL";
+        
+        if (!$isFirstImport) {
+            $sql .= " AND c.updated_at > '$sqlDate'";
+        }
+        
+        $sql .= " ORDER BY c.id ASC";
         
         $result = $this->db->query($sql);
-        if (!$result) return;
+        if (!$result) {
+            Logger::error('Ошибка запроса компаний');
+            return;
+        }
         
         $rows = $this->db->fetchAll($result);
-        $processed = 0;
+        Logger::write("Найдено компаний для обработки: " . count($rows));
         
         foreach ($rows as $row) {
-            if ($this->processCompany($row)) {
-                $processed++;
-            }
+            $this->processCompany($row);
         }
-        
-        Logger::write("Инкрементальный импорт компаний: $processed");
     }
 
-    private function incrementalImportContacts($sqlDate)
+    private function syncContacts($isFirstImport)
     {
-        // Получаем заказы измененные после даты
+        $lastSync = $isFirstImport 
+            ? DateTime::createFromTimestamp(0) 
+            : SyncStateTable::getLastSync('contact');
+        
+        $sqlDate = $lastSync->format('Y-m-d H:i:s');
+        
         $sql = "
             SELECT 
-                o.id as order_id,
-                o.company_id,
-                le.inn
-            FROM `order` o
-            LEFT JOIN company c ON o.company_id = c.id
+                u.id as user_id,
+                u.company_id,
+                u.firstname,
+                u.lastname,
+                u.middlename,
+                u.phone,
+                u.email,
+                u.group,
+                u.updated_at,
+                le.inn as company_inn
+            FROM user u
+            LEFT JOIN company c ON u.company_id = c.id
             LEFT JOIN legal_entity le ON c.id = le.company_id
-            WHERE o.updated_at > '$sqlDate'
-            AND le.inn IS NOT NULL
-            GROUP BY o.company_id";
+            WHERE u.firstname IS NOT NULL 
+              AND u.lastname IS NOT NULL
+              AND u.group = 'client'";   // если group может быть NULL, можно добавить OR u.group IS NULL
         
-        $result = $this->db->query($sql);
-        if (!$result) return;
-        
-        $orders = $this->db->fetchAll($result);
-        $totalProcessed = 0;
-        
-        foreach ($orders as $order) {
-            $processed = $this->importContactsForCompany($order['company_id'], $order['inn']);
-            $totalProcessed += $processed;
+        if (!$isFirstImport) {
+            $sql .= " AND u.updated_at > '$sqlDate'";
         }
         
-        Logger::write("Инкрементальный импорт контактов: $totalProcessed");
+        $sql .= " ORDER BY u.id ASC";
+        
+        $result = $this->db->query($sql);
+        if (!$result) {
+            Logger::error('Ошибка запроса контактов');
+            return;
+        }
+        
+        $rows = $this->db->fetchAll($result);
+        Logger::write("Найдено контактов для обработки: " . count($rows));
+        
+        foreach ($rows as $row) {
+            $this->processContact($row);
+        }
     }
 
     private function processCompany($row)
     {
-        if (empty($row['inn'])) {
-            Logger::write("Компания ID {$row['id']} без ИНН, пропускаем");
-            return false;
-        }
+        if (empty($row['inn'])) return;
         
-        // Ищем компанию по ИНН
         $companyId = BitrixHelper::findCompanyByInn($row['inn']);
         
+        $companyTitle = $row['legal_name'] ?: $row['legal_short_name'] ?: $row['company_name'] ?: 'Компания из B2B';
+        
         $companyData = [
-            'TITLE' => $row['name'] ?: $row['legal_name'] ?: $row['short_name'] ?: 'Компания из B2B',
-            'COMPANY_TYPE' => 'OTHER',
+            'TITLE' => $companyTitle,
+            'COMPANY_TYPE' => 'CUSTOMER',
             'SOURCE_ID' => 'B2B_IMPORT',
             'OPENED' => 'Y',
-            'ASSIGNED_BY_ID' => 1,
+            'ASSIGNED_BY_ID' => $this->techUserId,
             'UF_CRM_1728386018808' => $row['inn'],
         ];
         
-        // Добавляем КПП
-        if (!empty($row['kpp'])) {
-            $companyData['RQ_KPP'] = $row['kpp'];
-        }
-        
         if ($companyId) {
-            // Обновление компании
             BitrixHelper::updateCompany($companyId, $companyData);
-            Logger::write("Обновлена компания ID $companyId (ИНН {$row['inn']})");
+            Logger::write("Обновлена компания ID $companyId инн {$row['inn']}");
         } else {
-            // Создаем новую компанию
             $companyId = BitrixHelper::createCompany($companyData);
             if ($companyId) {
-                Logger::success("Создана компания ID $companyId (ИНН {$row['inn']})");
+                Logger::write("Создана компания ID $companyId инн {$row['inn']}");
+            } else {
+                return;
             }
         }
         
-        return $companyId ? true : false;
+        // Загружаем менеджеров
+        $managerIds = $this->loadCompanyManagers($row['company_id']);
+        $this->assignCompanyManagers($companyId, $managerIds);
+        
+        // Сохраняем в кэш
+        $this->companyCache[$row['company_id']] = $companyId;
+        $this->managerCache[$row['company_id']] = $managerIds;
+        
+        // ===== НОВОЕ: создаём реквизиты для компании =====
+        // Определяем пресет по is_individual
+        // 0 = юрлицо (пресет 2), 1 = ИП (пресет 4)
+        $presetId = ($row['is_individual'] == 1) ? 4 : 2;
+        
+        // Проверяем, есть ли уже реквизиты у компании (через BitrixHelper)
+        // Если нет, создаём
+        //BitrixHelper::createCompanyRequisites($companyId, $row['inn'], $presetId, $row['kpp'] ?? '');
+        // ================================================
     }
 
-    private function processContact($row, $companyId)
+    private function loadCompanyManagers($b2bCompanyId)
     {
-        if (empty($row['email']) && empty($row['phone'])) {
-            return false;
+        $sql = "
+            SELECT 
+                m.id,
+                m.email,
+                m.phone,
+                m.identity
+            FROM company_manager_relation cmr
+            LEFT JOIN manager m ON cmr.manager_id = m.id
+            WHERE cmr.company_id = $b2bCompanyId
+              AND m.id != $this->b2bAdminId";
+        
+        $result = $this->db->query($sql);
+        if (!$result) return [];
+        
+        $managers = $this->db->fetchAll($result);
+        if (empty($managers)) return [];
+        
+        $bitrixManagerIds = [];
+        foreach ($managers as $manager) {
+            $userId = $this->findBitrixUser($manager);
+            if ($userId) {
+                $bitrixManagerIds[] = $userId;
+            }
         }
         
-        // Ищем существующий контакт по email или телефону
-        $contactId = null;
-        if (!empty($row['email'])) {
-            $contactId = BitrixHelper::findUserByEmail($row['email']);
+        return $bitrixManagerIds;
+    }
+
+    private function findBitrixUser($manager)
+    {
+        if (!empty($manager['email'])) {
+            $userId = BitrixHelper::findUserByEmail($manager['email']);
+            if ($userId) return $userId;
         }
-        if (!$contactId && !empty($row['phone'])) {
-            $contactId = BitrixHelper::findUserByPhone($row['phone']);
+        
+        if (!empty($manager['phone'])) {
+            $userId = BitrixHelper::findUserByPhone($manager['phone']);
+            if ($userId) return $userId;
         }
+        
+        return null;
+    }
+
+    private function assignCompanyManagers($companyId, $managerIds)
+    {
+        if (empty($managerIds)) return;
+        
+        $currentAssigned = $this->getCurrentAssigned($companyId, 'company');
+        
+        $updateData = [
+            'UF_COMPANY_B2B_MANAGER' => $managerIds,
+            'OBSERVER' => $managerIds
+        ];
+        
+        if (!$currentAssigned || $currentAssigned == $this->techUserId) {
+            $updateData['ASSIGNED_BY_ID'] = $managerIds[0];
+            Logger::write("Назначен ответственный ID {$managerIds[0]} для компании ID $companyId");
+        }
+        
+        BitrixHelper::updateCompany($companyId, $updateData);
+    }
+
+    private function processContact($row)
+    {
+        if (empty($row['company_inn'])) {
+            Logger::write("Пропуск контакта ID {$row['user_id']} нет инн компании");
+            return;
+        }
+        
+        $companyId = BitrixHelper::findCompanyByInn($row['company_inn']);
+        if (!$companyId) {
+            Logger::write("Пропуск контакта ID {$row['user_id']} компания не найдена");
+            return;
+        }
+        
+        $contactId = $this->findContact($row);
         
         $contactFields = [
-            'NAME' => $row['firstname'],
-            'LAST_NAME' => $row['lastname'],
+            'NAME' => $row['firstname'] ?? '',
+            'LAST_NAME' => $row['lastname'] ?? '',
+            'SECOND_NAME' => $row['middlename'] ?? '',
+            'COMPANY_ID' => $companyId,
             'SOURCE_ID' => 'B2B_IMPORT',
             'OPENED' => 'Y',
-            'ASSIGNED_BY_ID' => 1,
-            'COMPANY_ID' => $companyId,
         ];
         
         if (!empty($row['phone'])) {
@@ -316,20 +320,81 @@ class CompanyContactSync
             ];
         }
         
-        if ($contactId) {
-            // Обновляем контакт
-            BitrixHelper::updateContact($contactId, $contactFields);
-            Logger::write("Обновлен контакт ID $contactId");
-            return true;
-        } else {
-            // Создаем новый
-            $contactId = BitrixHelper::createContact($contactFields);
-            if ($contactId) {
-                Logger::success("Создан контакт ID $contactId: {$row['firstname']} {$row['lastname']}");
-                return true;
+        $managerIds = $this->managerCache[$row['company_id']] ?? [];
+        if (!empty($managerIds)) {
+            $contactFields['UF_CONTACT_B2B_MANAGER'] = $managerIds;
+            $contactFields['OBSERVER'] = $managerIds;
+            
+            $currentAssigned = $contactId ? $this->getCurrentAssigned($contactId, 'contact') : null;
+            if (!$currentAssigned || $currentAssigned == $this->techUserId) {
+                $contactFields['ASSIGNED_BY_ID'] = $managerIds[0];
             }
         }
         
-        return false;
+        if ($contactId) {
+            $this->updateContact($contactId, $contactFields);
+            Logger::write("Обновлён контакт ID $contactId {$row['firstname']} {$row['lastname']}");
+        } else {
+            $contactId = $this->createContact($contactFields);
+            if ($contactId) {
+                Logger::write("Создан контакт ID $contactId {$row['firstname']} {$row['lastname']}");
+                
+                // ===== ДЛЯ КОНТАКТОВ тоже можно создать реквизиты (физлицо, пресет 6), если есть ИНН, но в user нет ИНН. Пока пропускаем.
+            }
+        }
+    }
+
+    private function findContact($row)
+    {
+        if (!empty($row['email'])) {
+            $res = \CCrmContact::GetListEx(
+                [],
+                ['=FM.EMAIL' => $row['email']],
+                false,
+                ['nTopCount' => 1],
+                ['ID']
+            );
+            if ($contact = $res->Fetch()) return $contact['ID'];
+        }
+        
+        if (!empty($row['phone'])) {
+            $phone = preg_replace('/[^0-9+]/', '', $row['phone']);
+            $res = \CCrmContact::GetListEx(
+                [],
+                ['=FM.PHONE' => $phone],
+                false,
+                ['nTopCount' => 1],
+                ['ID']
+            );
+            if ($contact = $res->Fetch()) return $contact['ID'];
+        }
+        
+        return null;
+    }
+
+    private function createContact($fields)
+    {
+        $contact = new \CCrmContact();
+        $id = $contact->Add($fields);
+        if (!$id) Logger::error('Ошибка создания контакта ' . $contact->LAST_ERROR);
+        return $id;
+    }
+
+    private function updateContact($id, $fields)
+    {
+        $contact = new \CCrmContact();
+        $result = $contact->Update($id, $fields);
+        if (!$result) Logger::error('Ошибка обновления контакта ' . $contact->LAST_ERROR);
+        return $result;
+    }
+
+    private function getCurrentAssigned($entityId, $entityType)
+    {
+        if ($entityType == 'company') {
+            $res = \CCrmCompany::GetListEx([], ['ID' => $entityId], false, ['nTopCount' => 1], ['ASSIGNED_BY_ID']);
+        } else {
+            $res = \CCrmContact::GetListEx([], ['ID' => $entityId], false, ['nTopCount' => 1], ['ASSIGNED_BY_ID']);
+        }
+        return ($item = $res->Fetch()) ? $item['ASSIGNED_BY_ID'] : null;
     }
 }

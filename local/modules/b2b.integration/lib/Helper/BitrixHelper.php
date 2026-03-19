@@ -5,6 +5,9 @@ use CCrmCompany;
 use CCrmContact;
 use CCrmDeal;
 use CCrmOwnerType;
+use Bitrix\Main\Loader;
+use Bitrix\Crm\RequisiteTable;
+use Bitrix\Crm\Requisite;
 
 class BitrixHelper
 {
@@ -68,27 +71,47 @@ class BitrixHelper
     {
         $company = new CCrmCompany();
         $id = $company->Add($data);
-        
-        // Создаем реквизиты если компания создана с ИНН
-        if ($id && !empty($data['UF_CRM_1728386018808'])) {
-            $requisiteFields = [
-                'ENTITY_TYPE_ID' => CCrmOwnerType::Company,
-                'ENTITY_ID' => $id,
-                'PRESET_ID' => 1,
-                'NAME' => $data['TITLE'] ?? 'Компания из B2B',
-                'ACTIVE' => 'Y',
-                'RQ_INN' => $data['UF_CRM_1728386018808'],
-            ];
-            
-            if (!empty($data['RQ_KPP'])) {
-                $requisiteFields['RQ_KPP'] = $data['RQ_KPP'];
-            }
-            
-            $requisite = new \Bitrix\Crm\Requisite();
-            $requisite->add($requisiteFields);
+        return $id;
+    }
+
+    // Создание реквизитов для компании
+    public static function createCompanyRequisites($companyId, $inn, $presetId = 2, $kpp = '')
+    {
+        if (!Loader::includeModule('crm')) {
+            return false;
         }
         
-        return $id;
+        // Проверяем, есть ли уже реквизиты у компании
+        $existing = RequisiteTable::getList([
+            'filter' => [
+                'ENTITY_TYPE_ID' => CCrmOwnerType::Company,
+                'ENTITY_ID' => $companyId
+            ],
+            'select' => ['ID']
+        ])->fetch();
+        
+        if ($existing) {
+            // реквизиты уже есть, не трогаем
+            return true;
+        }
+        
+        $requisiteFields = [
+            'ENTITY_TYPE_ID' => CCrmOwnerType::Company,
+            'ENTITY_ID' => $companyId,
+            'PRESET_ID' => $presetId,
+            'NAME' => 'Основные реквизиты',
+            'ACTIVE' => 'Y',
+            'RQ_INN' => $inn,
+        ];
+        
+        if (!empty($kpp)) {
+            $requisiteFields['RQ_KPP'] = $kpp;
+        }
+        
+        $requisite = new Requisite();
+        $result = $requisite->add($requisiteFields);
+        
+        return $result->isSuccess();
     }
 
     // Создание нового контакта в Битрикс
@@ -132,7 +155,7 @@ class BitrixHelper
         return ($contact = $res->Fetch()) ? $contact['ID'] : null;
     }
 
-    // Поиск контакта по телефону
+    // Поиск контакта по телефонu
     public static function findContactByPhone($phone)
     {
         global $DB;
