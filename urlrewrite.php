@@ -104,6 +104,14 @@ $arUrlRewrite=array (
     'PATH' => '/site_oo/desktop_app/router.php',
     'SORT' => 100,
   ),
+  281 => 
+  array (
+    'CONDITION' => '#^/extranet/video/([\\.\\-0-9a-zA-Z]+)(/?)([^/]*)#',
+    'RULE' => 'alias=$1&videoconf',
+    'ID' => 'call:conference',
+    'PATH' => '/conference/videoconf.php',
+    'SORT' => 100,
+  ),
   181 => 
   array (
     'CONDITION' => '#^/site_oo/video/([\\.\\-0-9a-zA-Z]+)(/?)([^/]*)#',
@@ -208,20 +216,20 @@ $arUrlRewrite=array (
     'PATH' => '/desktop_app/router.php',
     'SORT' => 100,
   ),
-  67 => 
-  array (
-    'CONDITION' => '#^/video/([\\.\\-0-9a-zA-Z]+)(/?)([^/]*)#',
-    'RULE' => 'alias=$1&videoconf',
-    'ID' => NULL,
-    'PATH' => '/desktop_app/router.php',
-    'SORT' => 100,
-  ),
   188 => 
   array (
     'CONDITION' => '#^/site_oo/pub/payment-slip/([\\w\\W]+)/#',
     'RULE' => 'signed_payment_id=$1',
     'ID' => 'bitrix:salescenter.pub.payment.slip',
     'PATH' => '/site_oo/pub/payment_slip.php',
+    'SORT' => 100,
+  ),
+  280 => 
+  array (
+    'CONDITION' => '#^/video/([\\.\\-0-9a-zA-Z]+)(/?)([^/]*)#',
+    'RULE' => 'alias=$1&videoconf',
+    'ID' => 'call:conference',
+    'PATH' => '/conference/videoconf.php',
     'SORT' => 100,
   ),
   10 => 
@@ -1790,6 +1798,14 @@ $arUrlRewrite=array (
     'RULE' => '',
     'ID' => 'bitrix:biconnector.apachesuperset.dashboard.controller',
     'PATH' => '/bi/dashboard/index.php',
+    'SORT' => 100,
+  ),
+  282 => 
+  array (
+    'CONDITION' => '#^/desktop/menu/#',
+    'RULE' => '',
+    'ID' => 'bitrix:intranet.menu',
+    'PATH' => '/desktop_menu/index.php',
     'SORT' => 100,
   ),
   81 => 

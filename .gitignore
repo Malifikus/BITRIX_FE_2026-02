@@ -34,6 +34,7 @@ Thumbs.db
 /local/php_interface/dbconn_local.php
 /bitrix/php_interface/dbconn.php
 *.config.local.php
+urlrewrite.php
 
 # Кэш и временные файлы
 /cache/
@@ -72,7 +73,11 @@ test-vibe/
 /local/templates/.default/components/bitrix/bizproc.workflow.start.list
 /local/components/bitrix/bizproc.workflow.info
 /local/templates/.default/components/bitrix/intranet.customsection
-/local/activities
+/local/activities/brbusinessaihelperfileparser
+/local/activities/brbusinessaihelperresultevaluation
+/local/activities/brbusinessaihelpersend
+/local/activities/custom/parsejsonactivity
 
 # Доработки Malifikus
 !/local/php_interface/s1/init_scripts/event_handlers/report_validator_on_epilog.php
+/local/activities/custom/companysearchactivity/config.php
