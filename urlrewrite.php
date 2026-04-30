@@ -1968,14 +1968,6 @@ $arUrlRewrite=array (
     'PATH' => '/site_oo/kb/index.php',
     'SORT' => 100,
   ),
-  259 => 
-  array (
-    'CONDITION' => '#^/bi/dataset/#',
-    'RULE' => '',
-    'ID' => 'bitrix:biconnector.apachesuperset.workspace_analytic.controller',
-    'PATH' => '/bi/dataset/index.php',
-    'SORT' => 100,
-  ),
   80 => 
   array (
     'CONDITION' => '#^/crm/quote/#',
@@ -2006,14 +1998,6 @@ $arUrlRewrite=array (
     'RULE' => '',
     'ID' => 'bitrix:biconnector.apachesuperset.workspace_analytic.controller',
     'PATH' => '/bi/source/index.php',
-    'SORT' => 100,
-  ),
-  262 => 
-  array (
-    'CONDITION' => '#^/vibe/edit/#',
-    'RULE' => '',
-    'ID' => 'bitrix:landing.start',
-    'PATH' => '/vibe/edit/index.php',
     'SORT' => 100,
   ),
   37 => 

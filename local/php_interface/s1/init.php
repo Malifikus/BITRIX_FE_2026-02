@@ -3,6 +3,15 @@
 // Подключение общих для всех скриптов констант
 include_once(__DIR__ . '/init_scripts/constants.php');
 
+// Ответ чат-бота поддержки в задаче потока
+// require_once(__DIR__ . '/BotManager.php');
+
+// Добавление прав HR на календари новых пользователей
+//include_once(__DIR__ . '/init_scripts/event_handlers/add_hr_calendar_access.php');
+
+// Подключаем обработчик для графика отсутствий
+//require_once __DIR__ . '/init_scripts/event_handlers/absence_handler.php';
+
 
 // Изменение настроек пользователей при загрузке страницы
 // Используется для задания колонок по умолчанию в списочном представлении СП Проекты
@@ -42,7 +51,7 @@ include_once(__DIR__ . '/init_scripts/event_handlers/change_styles_on_prolog.php
 include_once(__DIR__ . '/init_scripts/event_handlers/company_requisites_required.php');
 
 // Скрытие кнопки "Выбрать элемент" во вкладках карточки CRM
-include_once(__DIR__ . '/init_scripts/event_handlers/hide_pick_element_button.php');
+//include_once(__DIR__ . '/init_scripts/event_handlers/hide_pick_element_button.php');
 
 // Изменение стилей и логики после загрузки страницы
 // Используется для части доработки по запуску БП при создании задачи в Потоках
@@ -82,6 +91,6 @@ include_once(__DIR__ . '/init_scripts/services/crm_service_container.php');
 include_once(__DIR__ . '/init_scripts/event_handlers/task_update_handler.php');
 
 // Подмена класса диска для расширения прав на просмотр файлов в комментариях бизнес-процессов 
-//require_once(__DIR__ . '/override.php');
+require_once(__DIR__ . '/override.php');
 
 ?>
