@@ -1,0 +1,16 @@
+/* Минимальные стили для кнопки создания нового элемента CRM */
+.crm-element-button-open {
+	display: inline-block;
+	margin: 0 0 0 10px;
+	vertical-align: middle;
+}
+
+.crm-element-button-open span {
+	color: #2067b0;
+	border-bottom: 1px dashed #2067b0;
+	cursor: pointer;
+}
+
+.crm-element-button-open span:hover {
+	border-bottom: 1px solid #2067b0;
+}
