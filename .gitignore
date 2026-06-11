@@ -35,6 +35,7 @@ Thumbs.db
 /bitrix/php_interface/dbconn.php
 *.config.local.php
 urlrewrite.php
+**/config.php
 
 # Кэш и временные файлы
 /cache/
