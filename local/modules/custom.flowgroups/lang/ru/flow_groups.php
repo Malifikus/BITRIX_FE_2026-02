@@ -1,0 +1,20 @@
+<?php
+$MESS['FLOW_GROUPS_TITLE'] = 'Группировка потоков';
+$MESS['FLOW_GROUPS_LIST'] = 'Список групп';
+$MESS['FLOW_GROUPS_ADD'] = 'Добавить группу';
+$MESS['FLOW_GROUPS_EDIT'] = 'Редактировать группу';
+$MESS['FLOW_GROUPS_ID'] = 'ID';
+$MESS['FLOW_GROUPS_NAME'] = 'Название';
+$MESS['FLOW_GROUPS_FLOW_IDS'] = 'ID потоков';
+$MESS['FLOW_GROUPS_SORT'] = 'Сортировка';
+$MESS['FLOW_GROUPS_EXPANDED'] = 'Раскрыт';
+$MESS['FLOW_GROUPS_ACTIVE'] = 'Активен';
+$MESS['FLOW_GROUPS_ACTIONS'] = 'Действия';
+$MESS['FLOW_GROUPS_SAVE'] = 'Сохранить';
+$MESS['FLOW_GROUPS_APPLY'] = 'Применить';
+$MESS['FLOW_GROUPS_CANCEL'] = 'Отмена';
+$MESS['FLOW_GROUPS_DELETE'] = 'Удалить';
+$MESS['FLOW_GROUPS_DELETE_CONFIRM'] = 'Вы уверены, что хотите удалить эту группу?';
+$MESS['FLOW_GROUPS_YES'] = 'Да';
+$MESS['FLOW_GROUPS_NO'] = 'Нет';
+$MESS['FLOW_GROUPS_SELECT_FLOWS'] = 'Выберите потоки';
