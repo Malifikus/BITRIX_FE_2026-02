@@ -17,6 +17,9 @@ include_once(__DIR__ . '/init_scripts/constants.php');
 // Используется для задания колонок по умолчанию в списочном представлении СП Проекты
 include_once(__DIR__ . '/init_scripts/event_handlers/edit_user_options_on_prolog.php');
 
+// Логика для вставки кастомного компонента на страницу потоков
+// require_once(__DIR__ . '/init_scripts/event_handlers/meeting_funnel_handler.php');
+
 // Скрытие элементов при загрузке страницы
 // Используется для скрытия:
 // - некоторых полей и разделов в карточках CRM

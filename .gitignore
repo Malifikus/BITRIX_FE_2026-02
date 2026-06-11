@@ -80,7 +80,7 @@ test-vibe/
 /local/activities/brbusinessaihelpersend
 /local/activities/custom/parsejsonactivity
 
-# Доработки Malifikus
+# Доработки VP
 !/local/php_interface/s1/init_scripts/event_handlers/report_validator_on_epilog.php
 /local/activities/custom/companysearchactivity/config.php
 !/local/php_interface/s1/init_scripts/event_handlers/task_update_handler.php

@@ -1840,14 +1840,6 @@ $arUrlRewrite=array (
     'PATH' => '/docs/manage/index.php',
     'SORT' => 100,
   ),
-  3 => 
-  array (
-    'CONDITION' => '#^/\\.well-known#',
-    'RULE' => '',
-    'ID' => '',
-    'PATH' => '/bitrix/groupdav.php',
-    'SORT' => 100,
-  ),
   45 => 
   array (
     'CONDITION' => '#^/shop/stores/#',
