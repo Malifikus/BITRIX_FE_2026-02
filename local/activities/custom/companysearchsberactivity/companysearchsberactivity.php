@@ -1,193 +1,457 @@
-<?php if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) die();
+<?php
 
+/**
+ * Кастомная активность для поиска компании через Sber API.
+ *
+ * @package CompanySearchSberActivity
+ */
+
+if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) {
+    die();
+}
+
+use Bitrix\Bizproc\Activity\BaseActivity;
+use Bitrix\Bizproc\FieldType;
+use Bitrix\Main\ErrorCollection;
+use Bitrix\Main\Error;
 use Bitrix\Main\Localization\Loc;
-use Bitrix\Main\Web\HttpClient;
-use Bitrix\Main\Web\Json;
+use Bitrix\Bizproc\Activity\PropertiesDialog;
 
 Loc::loadMessages(__FILE__);
 
-class CBPCompanySearchSberActivity extends CBPActivity
+/**
+ * Класс активности для работы с Sber API.
+ */
+class CBPCompanySearchSberActivity extends BaseActivity
 {
+    /** @var array Конфигурация из config.php */
+    private $config;
+
+    /**
+     * Конструктор активности.
+     *
+     * @param string $name Имя активности.
+     */
     public function __construct($name)
     {
-        // Свойства ДО вызова parent
-        $this->arProperties = [
-            'Title' => '',
-            'Inn' => '',
-            'CompanyInfo' => null,
-            'LegalRisks' => null,
-            'CompanyData' => null,
-        ];
-        
         parent::__construct($name);
+
+        $this->arProperties = [
+            'INN' => '',
+            'KPP' => '',
+
+            // СберРейтинг
+            'RatingName' => null,
+            'RatingLevel' => null,
+            'RatingDescription' => null,
+            'RatingHint' => null,
+
+            // Риск блокировки
+            'RiskName' => null,
+            'RiskLevel' => null,
+            'RiskDescription' => null,
+            'RiskHint' => null,
+
+            // Госисточники
+            'StateName' => null,
+            'StateLevel' => null,
+            'StateDescription' => null,
+            'StateHint' => null,
+
+            // Финансовый анализ
+            'FinanceName' => null,
+            'FinanceLevel' => null,
+            'FinanceDescription' => null,
+            'FinanceHint' => null,
+
+            // Отчёт
+            'ReportLink' => null,
+            'FileId' => null,
+            'Random' => null,
+            'ReportFile' => null,
+
+            'ErrorMessage' => null,
+        ];
+
+        $this->SetPropertiesTypes([
+            'INN' => ['Type' => FieldType::STRING],
+            'KPP' => ['Type' => FieldType::STRING],
+            'RatingName' => ['Type' => FieldType::STRING],
+            'RatingLevel' => ['Type' => FieldType::STRING],
+            'RatingDescription' => ['Type' => FieldType::STRING],
+            'RatingHint' => ['Type' => FieldType::STRING],
+            'RiskName' => ['Type' => FieldType::STRING],
+            'RiskLevel' => ['Type' => FieldType::STRING],
+            'RiskDescription' => ['Type' => FieldType::STRING],
+            'RiskHint' => ['Type' => FieldType::STRING],
+            'StateName' => ['Type' => FieldType::STRING],
+            'StateLevel' => ['Type' => FieldType::STRING],
+            'StateDescription' => ['Type' => FieldType::STRING],
+            'StateHint' => ['Type' => FieldType::STRING],
+            'FinanceName' => ['Type' => FieldType::STRING],
+            'FinanceLevel' => ['Type' => FieldType::STRING],
+            'FinanceDescription' => ['Type' => FieldType::STRING],
+            'FinanceHint' => ['Type' => FieldType::STRING],
+            'ReportLink' => ['Type' => FieldType::STRING],
+            'FileId' => ['Type' => FieldType::STRING],
+            'Random' => ['Type' => FieldType::STRING],
+            'ReportFile' => ['Type' => FieldType::STRING],
+            'ErrorMessage' => ['Type' => FieldType::STRING],
+        ]);
+
+        $this->config = include __DIR__ . '/config.php';
     }
 
-    public function Execute()
-    {
-        $this->CompanyInfo = null;
-        $this->LegalRisks = null;
-        $this->CompanyData = null;
-
-        $inn = trim($this->Inn ?? '');
-        
-        if (empty($inn)) {
-            return CBPActivityExecutionStatus::Closed;
-        }
-
-        // Получаем конфигурацию
-        $config = $this->getConfig();
-        
-        if (empty($config['api_key'])) {
-            return CBPActivityExecutionStatus::Closed;
-        }
-
-        // Выполняем запрос к API Сбера
-        $apiResult = $this->fetchCompanyData($inn, $config);
-        
-        if (!$apiResult['success']) {
-            return CBPActivityExecutionStatus::Closed;
-        }
-
-        // Сохраняем данные компании
-        $companyData = $apiResult['data'];
-        $this->CompanyInfo = json_encode($companyData);
-        
-        // Обрабатываем юридические риски
-        $legalRisks = $this->extractLegalRisks($companyData);
-        $this->LegalRisks = json_encode($legalRisks);
-        
-        // Сохраняем полные данные компании
-        $this->CompanyData = json_encode($companyData);
-        
-        return CBPActivityExecutionStatus::Closed;
-    }
-    
     /**
-     * Получение данных компании через API Сбера
+     * Возвращает путь к текущему файлу.
      *
-     * @param string $inn ИНН компании
-     * @param array $config Конфигурация
-     * @return array Результат запроса
+     * @return string
      */
-    private function fetchCompanyData($inn, $config)
+    protected static function getFileName(): string
     {
+        return __FILE__;
+    }
+
+    /**
+     * Основной метод выполнения активности.
+     *
+     * @return ErrorCollection
+     */
+    protected function internalExecute(): ErrorCollection
+    {
+        $this->log(Loc::getMessage('COMPANY_SEARCH_LOG_START'));
+
+        $errors = parent::internalExecute();
+
+        $inn = trim($this->INN ?? '');
+        $kpp = trim($this->KPP ?? '');
+
+        $this->log(Loc::getMessage('COMPANY_SEARCH_LOG_INN_KPP', ['#INN#' => $inn, '#KPP#' => $kpp]));
+
+        if (empty($inn) || empty($kpp)) {
+            $this->preparedProperties['ErrorMessage'] = Loc::getMessage('COMPANY_SEARCH_ERROR_INN_KPP_REQUIRED');
+            $this->log(Loc::getMessage('COMPANY_SEARCH_LOG_ERROR_EMPTY'));
+            $errors->add([new Error(Loc::getMessage('COMPANY_SEARCH_ERROR_INN_KPP_REQUIRED'))]);
+            return $errors;
+        }
+
+        $this->log(Loc::getMessage('COMPANY_SEARCH_LOG_SEND_API'));
+
         try {
-            // Формируем URL для запроса
-            $url = $config['api_url'] . '/traffic-lights';
-            
-            // Подготавливаем заголовки
-            $headers = [
-                'Authorization: Bearer ' . $config['api_key'],
-                'Content-Type: application/json',
-                'Accept: application/json'
-            ];
-            
-            // Подготавливаем данные для запроса
-            $data = [
-                'inn' => $inn
-            ];
-            
-            // Выполняем HTTP-запрос
-            $response = $this->makeHttpRequest($url, $data, $headers);
-            
-            if ($response['status'] !== 200) {
-                return [
-                    'success' => false,
-                    'error' => Loc::getMessage('COMPANY_SEARCH_SBER_ERROR_API_CALL') . ': ' . $response['status']
-                ];
+            $companyData = $this->getCompanyDataFromSber($inn, $kpp);
+
+            $this->preparedProperties['INN'] = $companyData['inn'] ?? $inn;
+            $this->preparedProperties['KPP'] = $companyData['kpp'] ?? $kpp;
+
+            $this->preparedProperties['RatingName'] = $companyData['rating_name'] ?? '';
+            $this->preparedProperties['RatingLevel'] = $companyData['rating_level'] ?? '';
+            $this->preparedProperties['RatingDescription'] = $companyData['rating_description'] ?? '';
+            $this->preparedProperties['RatingHint'] = $companyData['rating_hint'] ?? '';
+
+            $this->preparedProperties['RiskName'] = $companyData['risk_name'] ?? '';
+            $this->preparedProperties['RiskLevel'] = $companyData['risk_level'] ?? '';
+            $this->preparedProperties['RiskDescription'] = $companyData['risk_description'] ?? '';
+            $this->preparedProperties['RiskHint'] = $companyData['risk_hint'] ?? '';
+
+            $this->preparedProperties['StateName'] = $companyData['state_name'] ?? '';
+            $this->preparedProperties['StateLevel'] = $companyData['state_level'] ?? '';
+            $this->preparedProperties['StateDescription'] = $companyData['state_description'] ?? '';
+            $this->preparedProperties['StateHint'] = $companyData['state_hint'] ?? '';
+
+            $this->preparedProperties['FinanceName'] = $companyData['finance_name'] ?? '';
+            $this->preparedProperties['FinanceLevel'] = $companyData['finance_level'] ?? '';
+            $this->preparedProperties['FinanceDescription'] = $companyData['finance_description'] ?? '';
+            $this->preparedProperties['FinanceHint'] = $companyData['finance_hint'] ?? '';
+
+            // Получение ссылки на отчёт
+            if (!empty($inn)) {
+                try {
+                    $reportData = $this->getReportLink($inn, $kpp);
+                    $this->preparedProperties['ReportLink'] = $reportData['link'] ?? '';
+                    $this->preparedProperties['Random'] = $reportData['random'] ?? '';
+                    $this->preparedProperties['FileId'] = $reportData['fileId'] ?? '';
+
+                    if (!empty($reportData['random']) && !empty($reportData['fileId'])) {
+                        $fileContent = $this->downloadFile($reportData['link']);
+                        $this->preparedProperties['ReportFile'] = base64_encode($fileContent);
+                    }
+                } catch (\Exception $e) {
+                    $this->log(Loc::getMessage('COMPANY_SEARCH_LOG_REPORT_ERROR') . $e->getMessage());
+                    $this->preparedProperties['ReportLink'] = $reportData['link']
+                        ?? Loc::getMessage('COMPANY_SEARCH_ERROR_REPORT_LINK_FAIL');
+                }
             }
-            
-            $responseData = json_decode($response['body'], true);
-            
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                return [
-                    'success' => false,
-                    'error' => Loc::getMessage('COMPANY_SEARCH_SBER_ERROR_JSON_PARSE')
-                ];
-            }
-            
-            return [
-                'success' => true,
-                'data' => $responseData
-            ];
-            
-        } catch (Exception $e) {
-            return [
-                'success' => false,
-                'error' => Loc::getMessage('COMPANY_SEARCH_SBER_ERROR_API_CALL') . ': ' . $e->getMessage()
-            ];
+
+            $this->log(Loc::getMessage('COMPANY_SEARCH_LOG_DATA_RECEIVED'));
+        } catch (\Exception $e) {
+            $this->preparedProperties['ErrorMessage'] = Loc::getMessage('COMPANY_SEARCH_ERROR_API') . $e->getMessage();
+            $this->log(Loc::getMessage('COMPANY_SEARCH_LOG_API_ERROR') . $e->getMessage());
+            $errors->add([new Error($e->getMessage())]);
         }
+
+        $this->log(Loc::getMessage('COMPANY_SEARCH_LOG_FINISH'));
+
+        return $errors;
     }
-    
+
     /**
-     * Извлечение информации о юридических рисках
+     * Получение данных о компании через API Сбера (метод traffic-lights).
      *
-     * @param array $companyData Данные компании
-     * @return array Массив юридических рисков
+     * @param string $inn ИНН.
+     * @param string $kpp КПП.
+     * @return array
+     * @throws \Exception
      */
-    private function extractLegalRisks($companyData)
+    private function getCompanyDataFromSber(string $inn, string $kpp): array
     {
-        $risks = [];
-        
-        // Проверяем наличие данных о рисках
-        if (isset($companyData['risks']) && is_array($companyData['risks'])) {
-            foreach ($companyData['risks'] as $risk) {
-                $risks[] = [
-                    'type' => $risk['type'] ?? '',
-                    'description' => $risk['description'] ?? '',
-                    'severity' => $risk['severity'] ?? '',
-                    'date' => $risk['date'] ?? ''
-                ];
+        $apiUrl = $this->config['api_url'] . $this->config['endpoints']['traffic_lights'];
+
+        $this->log(Loc::getMessage('COMPANY_SEARCH_LOG_API_REQUEST') . $apiUrl);
+
+        $payload = json_encode([
+            'organizations' => [
+                [
+                    'inn' => $inn,
+                    'kpp' => $kpp,
+                ],
+            ],
+        ]);
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $apiUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $this->config['timeout'] ?? 30);
+
+        curl_setopt($ch, CURLOPT_SSLCERTTYPE, 'P12');
+        curl_setopt($ch, CURLOPT_SSLCERT, $this->config['cert_path']);
+        curl_setopt($ch, CURLOPT_SSLCERTPASSWD, $this->config['cert_password']);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+
+        $accessToken = $this->config['access_token'] ?? '';
+
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Accept: application/json',
+            'Authorization: Bearer ' . $accessToken,
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        curl_close($ch);
+
+        if ($error) {
+            throw new \Exception(Loc::getMessage('COMPANY_SEARCH_ERROR_CURL') . $error);
+        }
+
+        if ($httpCode !== 200) {
+            throw new \Exception(Loc::getMessage('COMPANY_SEARCH_ERROR_HTTP') . $httpCode . ', ответ: ' . $response);
+        }
+
+        $data = json_decode($response, true);
+
+        $this->log(Loc::getMessage('COMPANY_SEARCH_LOG_RESPONSE') . print_r($data, true));
+
+        if (empty($data['message']['organizations'][0]['indicators'])) {
+            throw new \Exception(Loc::getMessage('COMPANY_SEARCH_ERROR_NO_DATA'));
+        }
+
+        $orgData = $data['message']['organizations'][0];
+        $indicators = $orgData['indicators'];
+
+        $result = [
+            'inn' => $orgData['inn'] ?? $inn,
+            'kpp' => $orgData['kpp'] ?? $kpp,
+            'rating_name' => '',
+            'rating_level' => '',
+            'rating_description' => '',
+            'rating_hint' => '',
+            'risk_name' => '',
+            'risk_level' => '',
+            'risk_description' => '',
+            'risk_hint' => '',
+            'state_name' => '',
+            'state_level' => '',
+            'state_description' => '',
+            'state_hint' => '',
+            'finance_name' => '',
+            'finance_level' => '',
+            'finance_description' => '',
+            'finance_hint' => '',
+        ];
+
+        foreach ($indicators as $indicator) {
+            $systemName = $indicator['indicatorSystemName'] ?? '';
+            $name = $indicator['indicatorName'] ?? '';
+            $level = $indicator['levelSystemName'] ?? '';
+            $description = $indicator['levelDescription'] ?? '';
+            $hint = $indicator['hintText'] ?? '';
+
+            if ($systemName === 'SBER_RATING_TOTAL') {
+                $result['rating_name'] = $name;
+                $result['rating_level'] = $level;
+                $result['rating_description'] = $description;
+                $result['rating_hint'] = $hint;
+            } elseif ($systemName === 'COMPLIANCE') {
+                $result['risk_name'] = $name;
+                $result['risk_level'] = $level;
+                $result['risk_description'] = $description;
+                $result['risk_hint'] = $hint;
+            } elseif ($systemName === 'STATE_SOURCES') {
+                $result['state_name'] = $name;
+                $result['state_level'] = $level;
+                $result['state_description'] = $description;
+                $result['state_hint'] = $hint;
+            } elseif ($systemName === 'INNER_BANK_SOURCES') {
+                $result['finance_name'] = $name;
+                $result['finance_level'] = $level;
+                $result['finance_description'] = $description;
+                $result['finance_hint'] = $hint;
             }
         }
-        
-        return $risks;
+
+        return $result;
     }
-    
+
     /**
-     * Выполнение HTTP-запроса
+     * Получение ссылки на PDF-отчёт.
      *
-     * @param string $url URL для запроса
-     * @param array $data Данные для отправки
-     * @param array $headers Заголовки
-     * @return array Результат запроса
+     * @param string $inn ИНН.
+     * @param string $kpp КПП.
+     * @return array
+     * @throws \Exception
      */
-    private function makeHttpRequest($url, $data, $headers)
+    private function getReportLink(string $inn, string $kpp): array
     {
-        $httpClient = new HttpClient();
-        $httpClient->setHeaders($headers);
-        
-        $postData = Json::encode($data);
-        $response = $httpClient->post($url, $postData);
-        $status = $httpClient->getStatus();
-        
-        if ($status !== 200) {
-            return [
-                'success' => false,
-                'error' => 'HTTP Error: ' . $status
-            ];
+        $apiUrl = $this->config['api_url'] . $this->config['endpoints']['report_link'];
+
+        $payload = json_encode([
+            'inn' => $inn,
+            'kpp' => $kpp,
+        ]);
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $apiUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $this->config['timeout'] ?? 30);
+
+        curl_setopt($ch, CURLOPT_SSLCERTTYPE, 'P12');
+        curl_setopt($ch, CURLOPT_SSLCERT, $this->config['cert_path']);
+        curl_setopt($ch, CURLOPT_SSLCERTPASSWD, $this->config['cert_password']);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+
+        $accessToken = $this->config['access_token'] ?? '';
+
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Accept: application/json',
+            'Authorization: Bearer ' . $accessToken,
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        curl_close($ch);
+
+        if ($error) {
+            throw new \Exception(Loc::getMessage('COMPANY_SEARCH_ERROR_CURL') . $error);
         }
-        
+
+        if ($httpCode !== 200) {
+            throw new \Exception(Loc::getMessage('COMPANY_SEARCH_ERROR_HTTP') . $httpCode . ', ответ: ' . $response);
+        }
+
+        $data = json_decode($response, true);
+
+        $this->log(Loc::getMessage('COMPANY_SEARCH_LOG_REPORT_LINK') . print_r($data, true));
+
+        if (empty($data['externalLink'])) {
+            throw new \Exception(Loc::getMessage('COMPANY_SEARCH_ERROR_REPORT_LINK_NOT_FOUND'));
+        }
+
+        $link = $data['externalLink'];
+
+        preg_match('/download-file\/([^\/]+)\/([^\/]+)/', $link, $matches);
+
         return [
-            'status' => $status,
-            'body' => $response
+            'link' => $link,
+            'random' => $matches[1] ?? '',
+            'fileId' => $matches[2] ?? '',
         ];
     }
-    
+
     /**
-     * Получение конфигурации активити
+     * Скачивание PDF-файла по ссылке.
      *
-     * @return array Конфигурация
+     * @param string $fileUrl Полная ссылка на файл.
+     * @return string Бинарное содержимое файла.
+     * @throws \Exception
      */
-    private function getConfig()
+    private function downloadFile(string $fileUrl): string
     {
-        $configPath = dirname(__FILE__) . '/config.php';
-        
-        if (file_exists($configPath)) {
-            $config = include $configPath;
-            return is_array($config) ? $config : [];
+        $this->log(Loc::getMessage('COMPANY_SEARCH_LOG_DOWNLOAD_FILE') . $fileUrl);
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $fileUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+
+        curl_setopt($ch, CURLOPT_SSLCERTTYPE, 'P12');
+        curl_setopt($ch, CURLOPT_SSLCERT, $this->config['cert_path']);
+        curl_setopt($ch, CURLOPT_SSLCERTPASSWD, $this->config['cert_password']);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+
+        $accessToken = $this->config['access_token'] ?? '';
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Authorization: Bearer ' . $accessToken,
+            'Accept: application/octet-stream',
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        curl_close($ch);
+
+        if ($error) {
+            throw new \Exception(Loc::getMessage('COMPANY_SEARCH_ERROR_CURL') . $error);
         }
-        
-        return [];
+
+        if ($httpCode !== 200) {
+            throw new \Exception(Loc::getMessage('COMPANY_SEARCH_ERROR_DOWNLOAD') . $httpCode);
+        }
+
+        return $response;
+    }
+
+    /**
+     * Карта свойств для диалога настройки в конструкторе БП.
+     *
+     * @param PropertiesDialog|null $dialog
+     * @return array[]
+     */
+    public static function getPropertiesDialogMap(?PropertiesDialog $dialog = null): array
+    {
+        return [
+            'INN' => [
+                'Name' => Loc::getMessage('SEARCHBYINN_ACTIVITY_FIELD_SUBJECT'),
+                'FieldName' => 'inn',
+                'Type' => FieldType::STRING,
+                'Required' => true,
+            ],
+            'KPP' => [
+                'Name' => Loc::getMessage('SEARCHBYINN_ACTIVITY_FIELD_KPP'),
+                'FieldName' => 'kpp',
+                'Type' => FieldType::STRING,
+                'Required' => true,
+            ],
+        ];
     }
 }

@@ -1,31 +1,150 @@
-<? if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true) die();
+<?php
 
-use \Bitrix\Main\Localization\Loc;
+/**
+ * Описание активности "Поиск компании Сбер".
+ *
+ * @package CompanySearchSberActivity
+ */
+
+use Bitrix\Main\Localization\Loc;
+use Bitrix\Bizproc\FieldType;
+
+Loc::loadMessages(__FILE__);
 
 $arActivityDescription = [
-    "NAME" => Loc::getMessage("COMPANY_SEARCH_SBER_DESCR_NAME"),
-    "DESCRIPTION" => Loc::getMessage("COMPANY_SEARCH_SBER_DESCR_DESCR"),
-    "TYPE" => "activity",
-    "CLASS" => "CBPCompanySearchSberActivity",
-    "JSCLASS" => "BizProcActivity",
-    "CATEGORY" => [
-        "ID" => "integrations",
-        "OWN_ID" => "integrations",
-        "OWN_NAME" => "Интеграции",
+    // Основная информация
+    'NAME' => Loc::getMessage('COMPANY_SEARCH_SBER_NAME'),
+    'DESCRIPTION' => Loc::getMessage('COMPANY_SEARCH_SBER_DESC'),
+    'TYPE' => 'activity',
+    'CLASS' => 'CompanySearchSberActivity',
+    'JSCLASS' => 'BizProcActivity',
+
+    // Категория в конструкторе бизнес-процессов
+    'CATEGORY' => [
+        'ID' => 'service',
+        'OWN_ID' => 'service',
+        'OWN_NAME' => Loc::getMessage('COMPANY_SEARCH_SBER_CATEGORY'),
     ],
-    "ICON" => "/local/activities/custom/companysearchsberactivity/sberbank-1_32x32.svg",
-    "RETURN" => [
-        "COMPANY_INFO" => [
-            "NAME" => Loc::getMessage("COMPANY_SEARCH_SBER_RETURN_COMPANY_INFO") ?: "Информация о компании",
-            "TYPE" => "string",
+
+    // Доступность для документов
+    'FILTER' => [
+        'INCLUDE' => [
+            ['crm', 'CCrmDocumentCompany'],
         ],
-        "LEGAL_RISKS" => [
-            "NAME" => Loc::getMessage("COMPANY_SEARCH_SBER_RETURN_LEGAL_RISKS") ?: "Юридические риски",
-            "TYPE" => "string",
+    ],
+
+    // Входные параметры активности
+    'PROPERTIES' => [
+        'INN' => [
+            'NAME' => Loc::getMessage('COMPANY_SEARCH_SBER_INN'),
+            'TYPE' => FieldType::STRING,
+            'REQUIRED' => true,
         ],
-        "COMPANY_DATA" => [
-            "NAME" => Loc::getMessage("COMPANY_SEARCH_SBER_RETURN_COMPANY_DATA") ?: "Данные компании",
-            "TYPE" => "string",
+        'KPP' => [
+            'NAME' => Loc::getMessage('COMPANY_SEARCH_SBER_KPP'),
+            'TYPE' => FieldType::STRING,
+            'REQUIRED' => true,
+        ],
+    ],
+
+    // Возвращаемые значения
+    'RETURN' => [
+        // Основные данные компании
+        'INN' => [
+            'NAME' => Loc::getMessage('COMPANY_SEARCH_SBER_INN_COMPANY'),
+            'TYPE' => FieldType::STRING,
+        ],
+        'KPP' => [
+            'NAME' => Loc::getMessage('COMPANY_SEARCH_SBER_KPP_COMPANY'),
+            'TYPE' => FieldType::STRING,
+        ],
+
+        // СберРейтинг
+        'RatingName' => [
+            'NAME' => Loc::getMessage('COMPANY_SEARCH_SBER_RATING_NAME'),
+            'TYPE' => FieldType::STRING,
+        ],
+        'RatingLevel' => [
+            'NAME' => Loc::getMessage('COMPANY_SEARCH_SBER_RATING_LEVEL'),
+            'TYPE' => FieldType::STRING,
+        ],
+        'RatingDescription' => [
+            'NAME' => Loc::getMessage('COMPANY_SEARCH_SBER_RATING_DESC'),
+            'TYPE' => FieldType::STRING,
+        ],
+        'RatingHint' => [
+            'NAME' => Loc::getMessage('COMPANY_SEARCH_SBER_RATING_HINT'),
+            'TYPE' => FieldType::STRING,
+        ],
+
+        // Риск блокировки
+        'RiskName' => [
+            'NAME' => Loc::getMessage('COMPANY_SEARCH_SBER_RISK_NAME'),
+            'TYPE' => FieldType::STRING,
+        ],
+        'RiskLevel' => [
+            'NAME' => Loc::getMessage('COMPANY_SEARCH_SBER_RISK_LEVEL'),
+            'TYPE' => FieldType::STRING,
+        ],
+        'RiskDescription' => [
+            'NAME' => Loc::getMessage('COMPANY_SEARCH_SBER_RISK_DESC'),
+            'TYPE' => FieldType::STRING,
+        ],
+        'RiskHint' => [
+            'NAME' => Loc::getMessage('COMPANY_SEARCH_SBER_RISK_HINT'),
+            'TYPE' => FieldType::STRING,
+        ],
+
+        // Госисточники
+        'StateName' => [
+            'NAME' => Loc::getMessage('COMPANY_SEARCH_SBER_STATE_NAME'),
+            'TYPE' => FieldType::STRING,
+        ],
+        'StateLevel' => [
+            'NAME' => Loc::getMessage('COMPANY_SEARCH_SBER_STATE_LEVEL'),
+            'TYPE' => FieldType::STRING,
+        ],
+        'StateDescription' => [
+            'NAME' => Loc::getMessage('COMPANY_SEARCH_SBER_STATE_DESC'),
+            'TYPE' => FieldType::STRING,
+        ],
+        'StateHint' => [
+            'NAME' => Loc::getMessage('COMPANY_SEARCH_SBER_STATE_HINT'),
+            'TYPE' => FieldType::STRING,
+        ],
+
+        // Финансовый анализ
+        'FinanceName' => [
+            'NAME' => Loc::getMessage('COMPANY_SEARCH_SBER_FINANCE_NAME'),
+            'TYPE' => FieldType::STRING,
+        ],
+        'FinanceLevel' => [
+            'NAME' => Loc::getMessage('COMPANY_SEARCH_SBER_FINANCE_LEVEL'),
+            'TYPE' => FieldType::STRING,
+        ],
+        'FinanceDescription' => [
+            'NAME' => Loc::getMessage('COMPANY_SEARCH_SBER_FINANCE_DESC'),
+            'TYPE' => FieldType::STRING,
+        ],
+        'FinanceHint' => [
+            'NAME' => Loc::getMessage('COMPANY_SEARCH_SBER_FINANCE_HINT'),
+            'TYPE' => FieldType::STRING,
+        ],
+
+        // Отчёт
+        'ReportLink' => [
+            'NAME' => Loc::getMessage('COMPANY_SEARCH_SBER_REPORT_LINK'),
+            'TYPE' => FieldType::STRING,
+        ],
+        'ReportFile' => [
+            'NAME' => Loc::getMessage('COMPANY_SEARCH_SBER_REPORT_FILE'),
+            'TYPE' => FieldType::STRING,
+        ],
+
+        // Ошибки
+        'ErrorMessage' => [
+            'NAME' => Loc::getMessage('COMPANY_SEARCH_SBER_ERROR'),
+            'TYPE' => FieldType::STRING,
         ],
     ],
 ];

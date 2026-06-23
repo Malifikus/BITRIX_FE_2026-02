@@ -44,6 +44,22 @@ urlrewrite.php
 *.tmp
 *.restore
 
+# Сертификаты, ключи и контейнеры
+*.crt
+*.cer
+*.key
+*.pem
+*.p12
+*.pfx
+*.jks
+*.pkcs12
+
+# Папки с сертификатами
+**/ssl/
+**/certs/
+**/certificates/
+**/keys/
+
 # Чувствительные файлы
 *.csv
 !.gitignore

@@ -93,6 +93,9 @@ include_once(__DIR__ . '/init_scripts/services/crm_service_container.php');
 // Обработчик изменения описания задачи
 include_once(__DIR__ . '/init_scripts/event_handlers/task_update_handler.php');
 
+// Обработчик скрытия кнопки завершения задачи
+include_once(__DIR__ . '/init_scripts/event_handlers/task_button_hide_handler.php');
+
 // Подмена класса диска для расширения прав на просмотр файлов в комментариях бизнес-процессов 
 require_once(__DIR__ . '/override.php');
 
