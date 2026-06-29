@@ -1,0 +1,35 @@
+<?
+$MESS["ALLOW_ANCHOR_TITLE"] = "Kích hoạt các liên kết";
+$MESS["ALLOW_BIU_TITLE"] = "Kích hoạt các thẻ B,U,I và S";
+$MESS["ALLOW_CODE_TITLE"] = "Kích hoạt mã";
+$MESS["ALLOW_FONT_TITLE"] = "Kích hoạt các Font chữ";
+$MESS["ALLOW_HTML_TITLE"] = "Kích hoạt HTML";
+$MESS["ALLOW_IMG_TITLE"] = "Kích hoạt các hình ảnh";
+$MESS["ALLOW_LIST_TITLE"] = "Kích hoạt các Danh Sách";
+$MESS["ALLOW_NL2BR_TITLE"] = "Thay thế dòng mới với <br>";
+$MESS["ALLOW_QUOTE_TITLE"] = "Kích hoạt các trích dẫn";
+$MESS["ALLOW_SMILES_TITLE"] = "Kích hoạt Biểu tượng mạt cười";
+$MESS["ALLOW_TABLE_TITLE"] = "Kích hoạt các bảng";
+$MESS["ALLOW_VIDEO_TITLE"] = "Kích hoạt các Video";
+$MESS["F_DATE_TIME_FORMAT"] = "Định dạng ngày và giờ";
+$MESS["F_EDITOR_CODE_DEFAULT"] = "Mặc định chế độ soạn thảo văn bản";
+$MESS["F_EDITOR_SETTINGS"] = "Chình sủa thiết lập";
+$MESS["F_ENTITY_ID"] = "ID số cơ quan";
+$MESS["F_ENTITY_TYPE"] = "Loại cơ quan";
+$MESS["F_ENTITY_XML_ID"] = "ID biểu tượng cơ quan (XML ID)";
+$MESS["F_FORUM_ID"] = "ID thảo luận diễn đàn";
+$MESS["F_IMAGE_HTML_SIZE"] = "Kích thước của hình ảnh nhúng trong văn bản (px) (được sử dụng cho HTML)";
+$MESS["F_IMAGE_SIZE"] = "Kích thước của hình ảnh trong bài viết (px)";
+$MESS["F_MESSAGES_PER_PAGE"] = "Số tin nhắn trên một trang";
+$MESS["F_NAME_TEMPLATE"] = "Định dạng tên";
+$MESS["F_PAGE_NAVIGATION_TEMPLATE"] = "Breadcrumb chuyển hướng mẫu tên";
+$MESS["F_PERMISSION"] = "Quyền truy cập";
+$MESS["F_PREORDER"] = "Xem các bài viết theo thứ tự tăng dần";
+$MESS["F_PROFILE_VIEW_TEMPLATE"] = "Trang sử dụng hồ sơ người dùng";
+$MESS["F_READ_TEMPLATE"] = "Trang xem chủ đề diễn đàn";
+$MESS["F_SHOW_MINIMIZED"] = "Thu gọn hình thức trả lời";
+$MESS["F_SHOW_RATING"] = "Xem bầu chọn";
+$MESS["F_SUBSCRIBE_AUTHOR_ELEMENT"] = "Theo dõi phần tử của tác giả đến bình luận mới";
+$MESS["F_USER_FIELDS"] = "Xem vùng thông báo tùy chỉnh";
+$MESS["F_USE_CAPTCHA"] = "Sử dụng CAPTCHA";
+?>

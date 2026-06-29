@@ -1,0 +1,37 @@
+<?
+$MESS["ALLOW_ALIGN_TITLE"] = "hizalama etkinleştir";
+$MESS["ALLOW_ANCHOR_TITLE"] = "bağlantıları etkinleştir";
+$MESS["ALLOW_BIU_TITLE"] = "Etiketleri etkinleştir B, U, I ve S";
+$MESS["ALLOW_CODE_TITLE"] = "kodu etkinleştir";
+$MESS["ALLOW_FONT_TITLE"] = "yazı tiplerini etkinleştir";
+$MESS["ALLOW_HTML_TITLE"] = "HTML etkinleştir";
+$MESS["ALLOW_IMG_TITLE"] = "görselleri etkinleştir";
+$MESS["ALLOW_LIST_TITLE"] = "listeleri etkinleştir";
+$MESS["ALLOW_MENTION_TITLE"] = "Kullanıcı mention etmeye izin ver";
+$MESS["ALLOW_NL2BR_TITLE"] = "yeni satırları şununla değiştir: <br>";
+$MESS["ALLOW_QUOTE_TITLE"] = "Alıntıları etkinleştir";
+$MESS["ALLOW_SMILES_TITLE"] = "ifadeleri etkinleştir";
+$MESS["ALLOW_TABLE_TITLE"] = "Tabloları etkinleştir";
+$MESS["ALLOW_VIDEO_TITLE"] = "Videoları etkinleştir";
+$MESS["F_DATE_TIME_FORMAT"] = "Tarih ve saat biçimi";
+$MESS["F_EDITOR_CODE_DEFAULT"] = "Düz Metin Düzenleyici Modu İçin Varsayılan";
+$MESS["F_EDITOR_SETTINGS"] = "Editör ayarları";
+$MESS["F_ENTITY_ID"] = "Numerik Varlık Kimliği";
+$MESS["F_ENTITY_TYPE"] = "Varlık türü";
+$MESS["F_ENTITY_XML_ID"] = "Simgesel Varlık Kimliği (XML Kimliği)";
+$MESS["F_FORUM_ID"] = "Tartışma Forum Kimliği";
+$MESS["F_IMAGE_HTML_SIZE"] = "Metin içerisine gömülmüş görselin boyutları (piksel)  (HTML sıkıştırmasında kulanıldı)";
+$MESS["F_IMAGE_SIZE"] = "Gönderideki Görsellerin Boyutu (piksel)";
+$MESS["F_MESSAGES_PER_PAGE"] = "Sayfa başına mesaj";
+$MESS["F_NAME_TEMPLATE"] = "İsim Biçimi";
+$MESS["F_PAGE_NAVIGATION_TEMPLATE"] = "Kırıntı navigasyon şablonu adı";
+$MESS["F_PERMISSION"] = "Erişim İzinleri";
+$MESS["F_PREORDER"] = "Gönderileri artan sırada göster";
+$MESS["F_PROFILE_VIEW_TEMPLATE"] = "Kullanıcı Profili Sayfası";
+$MESS["F_READ_TEMPLATE"] = "Forum Başlığı Görüntüleme Sayfası";
+$MESS["F_SHOW_MINIMIZED"] = "Yanıt formubu daralt";
+$MESS["F_SHOW_RATING"] = "Puanlamayı Göster";
+$MESS["F_SUBSCRIBE_AUTHOR_ELEMENT"] = "Ögenin yazarını yeni yorumlara abone yap";
+$MESS["F_USER_FIELDS"] = "İleti özel alanlarını göster:";
+$MESS["F_USE_CAPTCHA"] = "CAPTCHA kullan";
+?>

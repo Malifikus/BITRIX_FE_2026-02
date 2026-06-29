@@ -1,0 +1,35 @@
+<?
+$MESS["ALLOW_ANCHOR_TITLE"] = "Nome:";
+$MESS["ALLOW_BIU_TITLE"] = "Nome:";
+$MESS["ALLOW_CODE_TITLE"] = "Formato de nome";
+$MESS["ALLOW_FONT_TITLE"] = "Formato de nome";
+$MESS["ALLOW_HTML_TITLE"] = "Nome:";
+$MESS["ALLOW_IMG_TITLE"] = "Nome:";
+$MESS["ALLOW_LIST_TITLE"] = "Nome:";
+$MESS["ALLOW_NL2BR_TITLE"] = "Nome:";
+$MESS["ALLOW_QUOTE_TITLE"] = "Permitir citações";
+$MESS["ALLOW_SMILES_TITLE"] = "Nome:";
+$MESS["ALLOW_TABLE_TITLE"] = "Nome:";
+$MESS["ALLOW_VIDEO_TITLE"] = "Nome:";
+$MESS["F_DATE_TIME_FORMAT"] = "Movendo tópico para outro fórum";
+$MESS["F_EDITOR_CODE_DEFAULT"] = "Nome:";
+$MESS["F_EDITOR_SETTINGS"] = "Nome:";
+$MESS["F_ENTITY_ID"] = "ID númerica da Entidade";
+$MESS["F_ENTITY_TYPE"] = "Tipo de entidade";
+$MESS["F_ENTITY_XML_ID"] = "ID simbólica da Entidade (ID XML)";
+$MESS["F_FORUM_ID"] = "movido";
+$MESS["F_IMAGE_HTML_SIZE"] = "Dimensão de imagens embutidas no texto (px) (usado para compressão de HTML)";
+$MESS["F_IMAGE_SIZE"] = "Tamanho de imagens em Post (px)";
+$MESS["F_MESSAGES_PER_PAGE"] = "movido";
+$MESS["F_NAME_TEMPLATE"] = "nome";
+$MESS["F_PAGE_NAVIGATION_TEMPLATE"] = "Nome:";
+$MESS["F_PERMISSION"] = "Permissões de Acesso";
+$MESS["F_PREORDER"] = "Movendo tópico";
+$MESS["F_PROFILE_VIEW_TEMPLATE"] = "Movendo tópico";
+$MESS["F_READ_TEMPLATE"] = "Movendo mensagens do Fórum";
+$MESS["F_SHOW_MINIMIZED"] = "Nome:";
+$MESS["F_SHOW_RATING"] = "Nome:";
+$MESS["F_SUBSCRIBE_AUTHOR_ELEMENT"] = "Nome:";
+$MESS["F_USER_FIELDS"] = "Mostrar campos personalizados de mensagens";
+$MESS["F_USE_CAPTCHA"] = "movido";
+?>

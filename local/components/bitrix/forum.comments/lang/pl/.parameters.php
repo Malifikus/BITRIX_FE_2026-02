@@ -1,0 +1,35 @@
+<?
+$MESS["ALLOW_ANCHOR_TITLE"] = "włącz linki";
+$MESS["ALLOW_BIU_TITLE"] = "włącz tagi B, U, I i S";
+$MESS["ALLOW_CODE_TITLE"] = "włącz kod";
+$MESS["ALLOW_FONT_TITLE"] = "włącz czcionki";
+$MESS["ALLOW_HTML_TITLE"] = "włącz HTML";
+$MESS["ALLOW_IMG_TITLE"] = "włącz obrazy";
+$MESS["ALLOW_LIST_TITLE"] = "włącz listy";
+$MESS["ALLOW_NL2BR_TITLE"] = "zastąpić nowe linie <br>";
+$MESS["ALLOW_QUOTE_TITLE"] = "włącz cytowanie";
+$MESS["ALLOW_SMILES_TITLE"] = "włącz emotikony";
+$MESS["ALLOW_TABLE_TITLE"] = "włącz tabele";
+$MESS["ALLOW_VIDEO_TITLE"] = "włącz wideo";
+$MESS["F_DATE_TIME_FORMAT"] = "Format daty i godziny";
+$MESS["F_EDITOR_CODE_DEFAULT"] = "Domyślny Tryb Prostego Edytora Tekstu";
+$MESS["F_EDITOR_SETTINGS"] = "Ustawienia edytora";
+$MESS["F_ENTITY_ID"] = "ID Jednostki Numerycznej";
+$MESS["F_ENTITY_TYPE"] = "Typ jednostki";
+$MESS["F_ENTITY_XML_ID"] = "ID Jednostki Symbolicznej (ID XML)";
+$MESS["F_FORUM_ID"] = "ID forum dyskusji";
+$MESS["F_IMAGE_HTML_SIZE"] = "Wymiar obrazów wstawionych w tekst (px) (używane dla kompresji HTML)";
+$MESS["F_IMAGE_SIZE"] = "Rozmiar Obrazów w Poście (px)";
+$MESS["F_MESSAGES_PER_PAGE"] = "Wiadomości na stronę";
+$MESS["F_NAME_TEMPLATE"] = "Nazwa Formatu";
+$MESS["F_PAGE_NAVIGATION_TEMPLATE"] = "Nazwa szablonu nawigacji ścieżki";
+$MESS["F_PERMISSION"] = "Uprawnienia dostępu";
+$MESS["F_PREORDER"] = "Pokaż posty w kolejności rosnącej";
+$MESS["F_PROFILE_VIEW_TEMPLATE"] = "Strona profilu użytkownika";
+$MESS["F_READ_TEMPLATE"] = "Strona widoku tematu forum";
+$MESS["F_SHOW_MINIMIZED"] = "Zwiń formularz odpowiedzi";
+$MESS["F_SHOW_RATING"] = "Pokaż Oceny";
+$MESS["F_SUBSCRIBE_AUTHOR_ELEMENT"] = "Subskrybuj element autora do nowych komentarzy";
+$MESS["F_USER_FIELDS"] = "Pokaż niestandardowe pola wiadomości";
+$MESS["F_USE_CAPTCHA"] = "Użyj CAPTCHA";
+?>
