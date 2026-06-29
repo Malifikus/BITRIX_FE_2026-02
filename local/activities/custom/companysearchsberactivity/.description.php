@@ -27,11 +27,11 @@ $arActivityDescription = [
     ],
 
     // Доступность для документов
-    'FILTER' => [
-        'INCLUDE' => [
-            ['crm', 'CCrmDocumentCompany'],
-        ],
-    ],
+    //'FILTER' => [
+    //    'INCLUDE' => [
+    //       ['crm', 'CCrmDocumentCompany'],
+    //    ],
+    //],
 
     // Входные параметры активности
     'PROPERTIES' => [
@@ -43,7 +43,7 @@ $arActivityDescription = [
         'KPP' => [
             'NAME' => Loc::getMessage('COMPANY_SEARCH_SBER_KPP'),
             'TYPE' => FieldType::STRING,
-            'REQUIRED' => true,
+            'REQUIRED' => false,
         ],
     ],
 

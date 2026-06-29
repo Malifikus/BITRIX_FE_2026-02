@@ -128,10 +128,10 @@ class CBPCompanySearchSberActivity extends BaseActivity
 
         $this->log(Loc::getMessage('COMPANY_SEARCH_LOG_INN_KPP', ['#INN#' => $inn, '#KPP#' => $kpp]));
 
-        if (empty($inn) || empty($kpp)) {
-            $this->preparedProperties['ErrorMessage'] = Loc::getMessage('COMPANY_SEARCH_ERROR_INN_KPP_REQUIRED');
-            $this->log(Loc::getMessage('COMPANY_SEARCH_LOG_ERROR_EMPTY'));
-            $errors->add([new Error(Loc::getMessage('COMPANY_SEARCH_ERROR_INN_KPP_REQUIRED'))]);
+        if (empty($inn)) {
+            $this->preparedProperties['ErrorMessage'] = Loc::getMessage('COMPANY_SEARCH_ERROR_INN_REQUIRED');
+            $this->log(Loc::getMessage('COMPANY_SEARCH_LOG_ERROR_EMPTY_INN'));
+            $errors->add([new Error(Loc::getMessage('COMPANY_SEARCH_ERROR_INN_REQUIRED'))]);
             return $errors;
         }
 
@@ -163,24 +163,40 @@ class CBPCompanySearchSberActivity extends BaseActivity
             $this->preparedProperties['FinanceDescription'] = $companyData['finance_description'] ?? '';
             $this->preparedProperties['FinanceHint'] = $companyData['finance_hint'] ?? '';
 
-            // Получение ссылки на отчёт
-            if (!empty($inn)) {
-                try {
-                    $reportData = $this->getReportLink($inn, $kpp);
-                    $this->preparedProperties['ReportLink'] = $reportData['link'] ?? '';
-                    $this->preparedProperties['Random'] = $reportData['random'] ?? '';
-                    $this->preparedProperties['FileId'] = $reportData['fileId'] ?? '';
+        // Получение ссылки на отчёт
+        if (!empty($inn)) {
+            try {
+                $reportData = $this->getReportLink($inn, $kpp);
+                $this->preparedProperties['ReportLink'] = $reportData['link'] ?? '';
+                $this->preparedProperties['Random'] = $reportData['random'] ?? '';
+                $this->preparedProperties['FileId'] = $reportData['fileId'] ?? '';
 
-                    if (!empty($reportData['random']) && !empty($reportData['fileId'])) {
-                        $fileContent = $this->downloadFile($reportData['link']);
-                        $this->preparedProperties['ReportFile'] = base64_encode($fileContent);
+                if (!empty($reportData['link'])) {
+                    $fileContent = $this->downloadFile($reportData['link']);
+                    
+                    // Создаём папку если её нет
+                    $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/upload/sber_reports/';
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0775, true);
                     }
-                } catch (\Exception $e) {
-                    $this->log(Loc::getMessage('COMPANY_SEARCH_LOG_REPORT_ERROR') . $e->getMessage());
-                    $this->preparedProperties['ReportLink'] = $reportData['link']
-                        ?? Loc::getMessage('COMPANY_SEARCH_ERROR_REPORT_LINK_FAIL');
+                    
+                    // Формируем имя файла с датой
+                    $fileName = 'report_' . $inn . '_' . date('Ymd_His') . '.pdf';
+                    $filePath = $uploadDir . $fileName;
+                    
+                    // Сохраняем файл
+                    file_put_contents($filePath, $fileContent);
+                    
+                    // Сохраняем ссылку на файл для публичного доступа
+                    $this->preparedProperties['ReportFile'] = 'https://portal.forumgroup.ru/upload/sber_reports/' . $fileName;
+                    $this->log('PDF сохранён: ' . $filePath);
                 }
+            } catch (\Exception $e) {
+                $this->log(Loc::getMessage('COMPANY_SEARCH_LOG_REPORT_ERROR') . $e->getMessage());
+                $this->preparedProperties['ReportLink'] = $reportData['link']
+                    ?? Loc::getMessage('COMPANY_SEARCH_ERROR_REPORT_LINK_FAIL');
             }
+        }
 
             $this->log(Loc::getMessage('COMPANY_SEARCH_LOG_DATA_RECEIVED'));
         } catch (\Exception $e) {
@@ -202,20 +218,32 @@ class CBPCompanySearchSberActivity extends BaseActivity
      * @return array
      * @throws \Exception
      */
-    private function getCompanyDataFromSber(string $inn, string $kpp): array
+    private function getCompanyDataFromSber(string $inn, ?string $kpp = null): array
     {
         $apiUrl = $this->config['api_url'] . $this->config['endpoints']['traffic_lights'];
 
         $this->log(Loc::getMessage('COMPANY_SEARCH_LOG_API_REQUEST') . $apiUrl);
 
-        $payload = json_encode([
+        // Определяем ИП по длине ИНН (12 цифр)
+        $isIp = (strlen($inn) === 12);
+
+        // Формируем массив с ИНН
+        $data = [
             'organizations' => [
                 [
                     'inn' => $inn,
-                    'kpp' => $kpp,
                 ],
             ],
-        ]);
+        ];
+
+        // Для ИП передаём КПП = "0", для юрлиц — если передан
+        if ($isIp) {
+            $data['organizations'][0]['kpp'] = '0';
+        } elseif (!empty($kpp)) {
+            $data['organizations'][0]['kpp'] = $kpp;
+        }
+
+        $payload = json_encode($data);
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $apiUrl);
@@ -320,18 +348,28 @@ class CBPCompanySearchSberActivity extends BaseActivity
      * Получение ссылки на PDF-отчёт.
      *
      * @param string $inn ИНН.
-     * @param string $kpp КПП.
+     * @param string|null $kpp КПП (может быть null для ИП).
      * @return array
      * @throws \Exception
      */
-    private function getReportLink(string $inn, string $kpp): array
+    private function getReportLink(string $inn, ?string $kpp = null): array
     {
         $apiUrl = $this->config['api_url'] . $this->config['endpoints']['report_link'];
 
-        $payload = json_encode([
-            'inn' => $inn,
-            'kpp' => $kpp,
-        ]);
+        // Определяем ИП по длине ИНН (12 цифр)
+        $isIp = (strlen($inn) === 12);
+
+        // Формируем массив с ИНН
+        $data = ['inn' => $inn];
+
+        // Для ИП передаём КПП = "0", для юрлиц — если передан
+        if ($isIp) {
+            $data['kpp'] = '0';
+        } elseif (!empty($kpp)) {
+            $data['kpp'] = $kpp;
+        }
+
+        $payload = json_encode($data);
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $apiUrl);
@@ -411,7 +449,6 @@ class CBPCompanySearchSberActivity extends BaseActivity
 
         $accessToken = $this->config['access_token'] ?? '';
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Authorization: Bearer ' . $accessToken,
             'Accept: application/octet-stream',
         ]);
 
@@ -420,8 +457,20 @@ class CBPCompanySearchSberActivity extends BaseActivity
         $error = curl_error($ch);
         curl_close($ch);
 
+        // Логируем результат
+        $this->log('HTTP код: ' . $httpCode);
+        $this->log('Размер ответа: ' . strlen($response));
+        if ($httpCode !== 200) {
+            $this->log('Тело ответа (первые 500 символов): ' . substr($response, 0, 500));
+        }
+
         if ($error) {
             throw new \Exception(Loc::getMessage('COMPANY_SEARCH_ERROR_CURL') . $error);
+        }
+
+        if ($httpCode === 204) {
+            $this->log('HTTP 204: Нет данных для формирования отчёта');
+            return '';
         }
 
         if ($httpCode !== 200) {
@@ -450,7 +499,7 @@ class CBPCompanySearchSberActivity extends BaseActivity
                 'Name' => Loc::getMessage('SEARCHBYINN_ACTIVITY_FIELD_KPP'),
                 'FieldName' => 'kpp',
                 'Type' => FieldType::STRING,
-                'Required' => true,
+                'Required' => false,
             ],
         ];
     }
