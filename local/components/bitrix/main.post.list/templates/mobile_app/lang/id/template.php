@@ -1,0 +1,19 @@
+<?php
+$MESS["BLOG_C_HIDE"] = "Sembunyikan komentar";
+$MESS["BLOG_C_LOADING"] = "Memuat";
+$MESS["BLOG_C_REPLY"] = "Jawab";
+$MESS["BLOG_C_VIEW"] = "Komentar sebelumnya";
+$MESS["BPC_MES_COPYLINK"] = "Salin tautan";
+$MESS["BPC_MES_CREATETASK"] = "Buat tugas";
+$MESS["BPC_MES_DELETE"] = "Hapus";
+$MESS["BPC_MES_EDIT"] = "Edit";
+$MESS["BPC_MES_HIDE"] = "Sembunyikan";
+$MESS["BPC_MES_RESULT_V2"] = "Tandai sebagai ringkasan status tugas";
+$MESS["BPC_MES_SHOW"] = "Tunjukkan";
+$MESS["BPC_MES_VOTE1"] = "Menyukai";
+$MESS["BPC_MES_VOTE2"] = "Tidak suka";
+$MESS["B_B_PC_COM_ERROR"] = "Kesalahan:";
+$MESS["INCORRECT_SERVER_RESPONSE_2"] = "Ada kesalahan. Coba lagi nanti.";
+$MESS["MPL_HIDE_COLLAPSED_COMMENTS"] = "Sembunyikan ping";
+$MESS["MPL_MOBILE_PUBLISHING"] = "Menerbitkan&hellip;";
+$MESS["MPL_SHOW_COLLAPSED_COMMENTS"] = "Tampilkan ping";

@@ -1,0 +1,21 @@
+<?php
+$MESS["BLOG_C_HIDE"] = "コメントを非表示にする";
+$MESS["BLOG_C_LOADING"] = "読み込み中";
+$MESS["BLOG_C_REPLY"] = "返信";
+$MESS["BLOG_C_VIEW"] = "古いコメントを表示する";
+$MESS["BPC_MES_COPYLINK"] = "リンクをコピーする";
+$MESS["BPC_MES_CREATETASK"] = "タスクの作成";
+$MESS["BPC_MES_DELETE"] = "削除";
+$MESS["BPC_MES_EDIT"] = "編集";
+$MESS["BPC_MES_HIDE"] = "非表示";
+$MESS["BPC_MES_RESULT_V2"] = "タスクステータスの概要にする";
+$MESS["BPC_MES_SHOW"] = "表示する";
+$MESS["BPC_MES_VOTE"] = "いいねd by";
+$MESS["BPC_MES_VOTE1"] = "いいね";
+$MESS["BPC_MES_VOTE2"] = "Disいいね";
+$MESS["B_B_PC_COM_ERROR"] = "コメントの追加エラー:";
+$MESS["INCORRECT_SERVER_RESPONSE"] = "サーバーの応答が正しくありません";
+$MESS["INCORRECT_SERVER_RESPONSE_2"] = "エラーが発生しました  後でもう一度お試しください";
+$MESS["MPL_HIDE_COLLAPSED_COMMENTS"] = "Ping を非表示";
+$MESS["MPL_MOBILE_PUBLISHING"] = "公開中&hellip;";
+$MESS["MPL_SHOW_COLLAPSED_COMMENTS"] = "Ping を表示";

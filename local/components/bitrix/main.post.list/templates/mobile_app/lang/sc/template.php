@@ -1,0 +1,19 @@
+<?php
+$MESS["BLOG_C_HIDE"] = "隐藏评论";
+$MESS["BLOG_C_LOADING"] = "正在加载";
+$MESS["BLOG_C_REPLY"] = "答复";
+$MESS["BLOG_C_VIEW"] = "以前的评论";
+$MESS["BPC_MES_COPYLINK"] = "复制链接";
+$MESS["BPC_MES_CREATETASK"] = "创建任务";
+$MESS["BPC_MES_DELETE"] = "删除";
+$MESS["BPC_MES_EDIT"] = "编辑";
+$MESS["BPC_MES_HIDE"] = "隐藏";
+$MESS["BPC_MES_RESULT_V2"] = "标记为任务状态摘要";
+$MESS["BPC_MES_SHOW"] = "显示";
+$MESS["BPC_MES_VOTE1"] = "赞";
+$MESS["BPC_MES_VOTE2"] = "不喜欢";
+$MESS["B_B_PC_COM_ERROR"] = "错误：";
+$MESS["INCORRECT_SERVER_RESPONSE_2"] = "发生出错。请稍后再试。";
+$MESS["MPL_HIDE_COLLAPSED_COMMENTS"] = "隐藏系统消息";
+$MESS["MPL_MOBILE_PUBLISHING"] = "发布中&hellip;";
+$MESS["MPL_SHOW_COLLAPSED_COMMENTS"] = "显示系统消息";

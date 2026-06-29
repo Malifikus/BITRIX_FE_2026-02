@@ -1,0 +1,19 @@
+<?php
+$MESS["BLOG_C_HIDE"] = "隱藏意見";
+$MESS["BLOG_C_LOADING"] = "正在載入";
+$MESS["BLOG_C_REPLY"] = "回覆";
+$MESS["BLOG_C_VIEW"] = "先前的意見";
+$MESS["BPC_MES_COPYLINK"] = "複製連結";
+$MESS["BPC_MES_CREATETASK"] = "建立任務";
+$MESS["BPC_MES_DELETE"] = "刪除";
+$MESS["BPC_MES_EDIT"] = "編輯";
+$MESS["BPC_MES_HIDE"] = "隱藏";
+$MESS["BPC_MES_RESULT_V2"] = "標記為任務狀態摘要";
+$MESS["BPC_MES_SHOW"] = "顯示";
+$MESS["BPC_MES_VOTE1"] = "讚";
+$MESS["BPC_MES_VOTE2"] = "遜";
+$MESS["B_B_PC_COM_ERROR"] = "錯誤：";
+$MESS["INCORRECT_SERVER_RESPONSE_2"] = "有發生錯誤。請稍後再試。";
+$MESS["MPL_HIDE_COLLAPSED_COMMENTS"] = "隱藏Ping";
+$MESS["MPL_MOBILE_PUBLISHING"] = "發佈中&hellip;";
+$MESS["MPL_SHOW_COLLAPSED_COMMENTS"] = "顯示Ping";

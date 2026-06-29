@@ -1,0 +1,19 @@
+<?php
+$MESS["BLOG_C_HIDE"] = "Ẩn bình luận";
+$MESS["BLOG_C_LOADING"] = "Đang tải";
+$MESS["BLOG_C_REPLY"] = "Trả lời";
+$MESS["BLOG_C_VIEW"] = "Bình luận trước";
+$MESS["BPC_MES_COPYLINK"] = "Sao chép đường dẫn";
+$MESS["BPC_MES_CREATETASK"] = "tạo công việc";
+$MESS["BPC_MES_DELETE"] = "Xoá";
+$MESS["BPC_MES_EDIT"] = "Sửa";
+$MESS["BPC_MES_HIDE"] = "Ẩn";
+$MESS["BPC_MES_RESULT_V2"] = "Đánh dấu là tóm tắt trạng thái tác vụ";
+$MESS["BPC_MES_SHOW"] = "Hiển thị";
+$MESS["BPC_MES_VOTE1"] = "Thích";
+$MESS["BPC_MES_VOTE2"] = "Không thích";
+$MESS["B_B_PC_COM_ERROR"] = "Lỗi khi thêm bình luận:";
+$MESS["INCORRECT_SERVER_RESPONSE_2"] = "Đã có lỗi xảy ra. Vui lòng thử lại sau.";
+$MESS["MPL_HIDE_COLLAPSED_COMMENTS"] = "Ẩn ping";
+$MESS["MPL_MOBILE_PUBLISHING"] = "Đang phát hành&hellip;";
+$MESS["MPL_SHOW_COLLAPSED_COMMENTS"] = "Hiển thị ping";

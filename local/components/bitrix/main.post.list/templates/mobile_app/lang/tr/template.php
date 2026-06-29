@@ -1,0 +1,21 @@
+<?php
+$MESS["BLOG_C_HIDE"] = "Yorumları gizle";
+$MESS["BLOG_C_LOADING"] = "Yükleme";
+$MESS["BLOG_C_REPLY"] = "Yanıt";
+$MESS["BLOG_C_VIEW"] = "Yorumları Görüntüle";
+$MESS["BPC_MES_COPYLINK"] = "Bağlantıyı kopyala";
+$MESS["BPC_MES_CREATETASK"] = "Görev oluştur";
+$MESS["BPC_MES_DELETE"] = "Sil";
+$MESS["BPC_MES_EDIT"] = "Düzenle";
+$MESS["BPC_MES_HIDE"] = "Gizle";
+$MESS["BPC_MES_RESULT_V2"] = "Görev durumu özeti olarak işaretle";
+$MESS["BPC_MES_SHOW"] = "Göster";
+$MESS["BPC_MES_VOTE"] = "Beğenen";
+$MESS["BPC_MES_VOTE1"] = "Beğen";
+$MESS["BPC_MES_VOTE2"] = "Beğenmeme";
+$MESS["B_B_PC_COM_ERROR"] = "Hata:";
+$MESS["INCORRECT_SERVER_RESPONSE"] = "Hatalı sunucu cevabı.";
+$MESS["INCORRECT_SERVER_RESPONSE_2"] = "Bir hata oluştu. Lütfen daha sonra tekrar deneyin.";
+$MESS["MPL_HIDE_COLLAPSED_COMMENTS"] = "Pingleri gizle";
+$MESS["MPL_MOBILE_PUBLISHING"] = "Yayınlanıyor&hellip;";
+$MESS["MPL_SHOW_COLLAPSED_COMMENTS"] = "Pingleri göster";
