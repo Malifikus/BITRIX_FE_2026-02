@@ -83,7 +83,6 @@ idealog.txt
 /node_modules/
 
 # Сторонние модули и доработки
-/local/php_interface/s1/init_scripts/
 /local/php_interface/s1/override.php
 /local/php_interface/s1/classes/
 test-vibe/
