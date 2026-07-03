@@ -63,11 +63,14 @@ include_once(__DIR__ . '/init_scripts/event_handlers/disable_specific_notificati
 // Валидация длины отчета weekly с переопределением js файла
 include_once(__DIR__ . '/init_scripts/event_handlers/report_validator_on_epilog.php');
 
+// Перенос отчётов из рабочего времени в рабочие отчёты
+//include_once(__DIR__ . '/init_scripts/event_handlers/timeman_report_handler.php');
+
 // Меню-слайдер в левом меню Битрикс24 на пункте "CRM"
 // include_once(__DIR__ . '/init_scripts/crm_menu/connect_menu.php');
 
 // Переопределение сервиса crm.service.container. Используется для проверки зависимых полей при создании/изменении СП
-include_once(__DIR__ . '/init_scripts/services/crm_service_container.php');
+//include_once(__DIR__ . '/init_scripts/services/crm_service_container.php');
 
 // Обработчик изменения описания задачи
 include_once(__DIR__ . '/init_scripts/event_handlers/task_update_handler.php');
@@ -80,6 +83,9 @@ require_once(__DIR__ . '/override.php');
 
 // Переопределение Feed бизнес-процессов для доступа к добавлению комментария
 include_once(__DIR__ . '/init_scripts/event_handlers/forum_comments_feed.php');
+
+// Кастомное поле "Индикатор риска (Сбер)" для CRM
+// require_once(__DIR__ . '/lib/RiskIndicator.php');
 
 // ============================================
 // ============== ПРАВКИ БД ===================
