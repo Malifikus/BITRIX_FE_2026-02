@@ -1,0 +1,35 @@
+name: Уведомления о коммитах
+
+on:
+  push:  # Пуш
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Отправка коммита уведомления в Telegram
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          # Формируем сообщение
+          COMMIT_MESSAGE="${{ github.event.head_commit.message }}"
+          COMMIT_AUTHOR="${{ github.event.head_commit.author.name }}"
+          COMMIT_URL="${{ github.event.head_commit.url }}"
+          REPO_NAME="${{ github.repository }}"
+          BRANCH="${{ github.ref_name }}"
+          
+          # Текст сообщения
+          MESSAGE="📦 *Новый коммит!*
+          
+          📂 Репозиторий: $REPO_NAME
+          🌿 Ветка: $BRANCH
+          👤 Автор: $COMMIT_AUTHOR
+          📝 Сообщение: $COMMIT_MESSAGE
+          🔗 Ссылка: $COMMIT_URL"
+          
+          # Отправляем в Telegram
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_TOKEN_COMMITSBOT}/sendMessage" \
+            -d chat_id="${TELEGRAM_CHAT_ID_MALIFIKUSS}" \
+            -d text="${MESSAGE}" \
+            -d parse_mode="Markdown"
