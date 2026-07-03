@@ -9,8 +9,8 @@ jobs:
     steps:
       - name: Отправка коммита уведомления в Telegram
         env:
-          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN_COMMITSBOT }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID_MALIFIKUSS }}
         run: |
           # Формируем сообщение
           COMMIT_MESSAGE="${{ github.event.head_commit.message }}"
@@ -29,7 +29,7 @@ jobs:
           🔗 Ссылка: $COMMIT_URL"
           
           # Отправляем в Telegram
-          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_TOKEN_COMMITSBOT}/sendMessage" \
-            -d chat_id="${TELEGRAM_CHAT_ID_MALIFIKUSS}" \
+          curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage" \
+            -d chat_id="${TELEGRAM_CHAT_ID}" \
             -d text="${MESSAGE}" \
             -d parse_mode="Markdown"
